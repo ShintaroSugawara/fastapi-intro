@@ -2,10 +2,12 @@ services:
   fast-api-app:
     build: .
     volumes:
-      - ./.dockervenv:/src/.venv
       - ./:/src
     ports:
       - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
 
   db:
     image: mysql:8.0
@@ -17,7 +19,11 @@ services:
       - mysql_data:/var/lib/mysql
     ports:
       - "33306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
 volumes:
   mysql_data:
-
